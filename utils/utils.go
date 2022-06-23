@@ -230,14 +230,13 @@ func ReadByte(pos int, buff []byte) (byte, int) {
 
 //ReadUnicodeString read and return a unicode string
 func ReadUnicodeString(pos int, buff []byte) ([]byte, int) {
-	//stupid hack as using bufio and ReadString(byte) would terminate too early
-	//would terminate on 0x00 instead of 0x0000
-	index := bytes.Index(buff[pos:], []byte{0x00, 0x00})
-	if index == -1 {
-		return nil, 0
+	for i := 0; pos+i+1 < len(buff); i+=2 {
+		if buff[pos+i] == 0 && buff[pos+i+1] == 0 {
+			str := buff[pos : pos+i]
+			return []byte(str), pos + i + 2
+		}
 	}
-	str := buff[pos : pos+index]
-	return []byte(str), pos + index + 2
+	return nil, pos
 }
 
 //ReadUTF16BE reads the unicode string that the outlook rule file uses
